@@ -10,9 +10,16 @@
 <label for="pdf">PDF brief or marked-up sheet</label><input id="pdf" type="file" accept=".pdf,application/pdf">
 <label for="dwg">DWG reference</label><input id="dwg" type="file" accept=".dwg">
 <div class="row"><label>DWG units<select id="unit"><option value="">Use drawing units</option><option value="1">Millimetres</option><option value="1000">Metres</option><option value="25.4">Inches</option><option value="304.8">Feet</option></select></label></div>
-<label for="key">OpenAI API key</label><input id="key" type="password" autocomplete="off" placeholder="Required for online generation">
+<details><summary>Direct API generation (optional)</summary><label for="key">OpenAI API key</label><input id="key" type="password" autocomplete="off" placeholder="Required for online generation">
 <p class="hint">Your browser sends the PDF, brief and extracted CAD data directly to OpenAI. The key stays in this tab and is never saved by Detail Studio.</p>
-<div class="row actions"><button class="primary" id="generate">Generate draft</button><button type="button" id="sample">Load sample</button></div>
+<div class="row actions"><button id="generate">Generate with API</button></div></details>
+<div class="review"><h2>Draft with ChatGPT</h2>
+<p>Select <strong>Prepare brief</strong>, then paste it into ChatGPT and attach your marked-up PDF. Import the draft JSON returned by ChatGPT.</p>
+<div class="row"><button type="button" class="primary" id="prepareChat">Prepare brief</button><a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a></div>
+<div id="chatBriefWrap" hidden><label for="chatBrief">Prepared brief</label><textarea id="chatBrief" readonly></textarea></div>
+<label for="jsonFile">Draft JSON file</label><input id="jsonFile" type="file" accept=".json,application/json">
+<label for="chatDraft">Or paste draft JSON</label><textarea id="chatDraft" spellcheck="false"></textarea>
+<div class="row actions"><button type="button" id="importChat">Import draft</button><button type="button" id="sample">Load sample</button></div></div>
 <p id="status" role="status"></p></form></section>
 <section><h2 id="title">Drawing preview</h2><div class="row"><label>Print scale<select id="scale"><option>2</option><option selected>5</option><option>10</option><option>20</option><option>50</option></select></label><label>Sheet<select id="paper"><option value="297,210">A4 landscape</option><option value="420,297">A3 landscape</option></select></label></div>
 <div class="viewport" id="drawing"><p>Generate a detail or load the sample to check the export workflow.</p></div>
