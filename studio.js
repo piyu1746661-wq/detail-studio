@@ -145,3 +145,40 @@ by("brief").addEventListener("submit",async event=>{
   }catch(error){status(error.message||"Generation failed.");by("drawing").textContent="The detail could not be generated.";}
   finally{by("generate").disabled=false;by("sample").disabled=false;}
 });
+
+async function makeChatBrief(){
+  const prompt=by("prompt").value.trim();
+  const pdf=by("pdf").files[0], dwg=by("dwg").files[0];
+  const source=["Use the following request as the drafting brief.",prompt||"Use the attached marked-up PDF to identify the requested detail."];
+  if(pdf)source.push("PDF reference to attach separately in ChatGPT: "+pdf.name);
+  if(dwg){
+    if(dwg.size>15e6)throw Error("Use a cropped DWG under 15 MB.");
+    status("Reading DWG model coordinates…");
+    source.push(await cadContext(dwg));
+  }
+  return [instructions,"Provide the finished object as a downloadable detail-draft.json file where possible, or put only the object in a JSON code block.",...source].join("\n\n");
+}
+if(by("prepareChat"))by("prepareChat").onclick=async()=>{
+  const button=by("prepareChat");
+  button.disabled=true;
+  try{
+    const prompt=await makeChatBrief();
+    by("chatBrief").value=prompt;
+    by("chatBriefWrap").hidden=false;
+    try{await navigator.clipboard.writeText(prompt);status("Copied. Open ChatGPT, paste the brief, and attach your marked-up PDF.");}
+    catch{by("chatBrief").select();status("Copy the prepared brief, then paste it in ChatGPT and attach your marked-up PDF.");}
+  }catch(error){status(error.message+" You can clear the DWG input and attach a dimensioned PDF plotted from it instead.");}
+  finally{button.disabled=false;}
+};
+async function importChatDraft(){
+  try{
+    const file=by("jsonFile").files[0];
+    if(file?.size>1e6)throw Error("Use a JSON draft under 1 MB.");
+    const raw=(file?await file.text():by("chatDraft").value).trim();
+    if(!raw)throw Error("Paste the JSON draft or select a JSON file.");
+    const fenced=raw.match(/^\x60\x60\x60(?:json)?\s*([\s\S]*?)\s*\x60\x60\x60$/i);
+    show(JSON.parse(fenced?fenced[1]:raw));
+    status("Draft imported. Compare its dimensions with the source before exporting.");
+  }catch(error){status(error instanceof SyntaxError?"Import the JSON object from ChatGPT, without surrounding commentary.":error.message);}
+}
+if(by("importChat"))by("importChat").onclick=importChatDraft;
